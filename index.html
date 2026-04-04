@@ -19,19 +19,142 @@
         .booking-row { border-bottom: 1px solid #f1f5f9; cursor: pointer; }
         .booking-summary { padding: 15px; display: flex; justify-content: space-between; }
         .booking-details { display: none; padding: 15px; background: #fcfdfe; border-top: 1px dashed #e2e8f0; font-size: 0.85rem; }
-        .login-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; }
+        .login-overlay {
+    position: fixed;
+    inset: 0;
+    /* 1. Fallback Color  2. Blue Tint Overlay  3. The Image */
+    background-image: linear-gradient(rgba(41, 82, 200, 0.5), rgba(41, 82, 200, 0.5)), 
+                      url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
     </style>
 </head>
 <body>
 
+<style>
+    :root {
+        --brand-blue: #2952c8;
+        --input-bg: rgba(255, 255, 255, 0.95);
+        --input-text: #1a1f36;
+        --placeholder-text: #718096;
+    }
+
+    /* Updated Login Overlay */
+    .login-overlay {
+        position: fixed;
+        inset: 0;
+        background: var(--brand-blue); /* Your new brand blue */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001; /* Ensure it covers everything */
+        backdrop-filter: blur(10px); /* Modern blurred background */
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Modern Login Container */
+    .login-box {
+        background: transparent;
+        border-radius: 20px;
+        text-align: center;
+        width: 90%;
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        position: relative;
+    }
+
+    /* Modern, Minimalist Input Styling */
+    .login-input {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 12px;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        font-size: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .login-input::placeholder {
+        color: var(--placeholder-text);
+        font-weight: 500;
+    }
+
+    .login-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(41, 82, 200, 0.3); /* Focus border matching blue */
+    }
+
+    /* Stylized 'SIGN IN' Button */
+    .btn-login {
+        background: rgba(255, 255, 255, 0.15); /* Semi-transparent button */
+        border: 2px solid white; /* Clean white border */
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        width: 100%;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .btn-login:hover {
+        background: white;
+        color: var(--brand-blue); /* Inverts colors on hover */
+    }
+
+    /* Error Text Style */
+    #loginError {
+        color: #ffcccc;
+        font-size: 0.8rem;
+        margin-top: -10px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+</style>
+
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <h2 style="font-family: Montserrat">Admin Login</h2>
-        <input type="email" id="emailIn" placeholder="Email">
-        <input type="password" id="passIn" placeholder="Password">
-        <button onclick="attemptLogin()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:700; margin-top:10px;">Login</button>
-    </div>
+        <img src="https://image2url.com/r2/default/images/1775205068668-9ce153cf-7aa5-4e66-8e5e-013745d94b55.jpg" 
+             alt="NNA VITTALO Logo" 
+             style="height: 60px; width: auto; display: block; margin-bottom: 40px;">
+             <h1 style="font-family: 'Montserrat', sans-serif; color: white; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Admin Dashboard</h1>
+        
+        <input type="email" id="adminEmail" class="login-input" placeholder="Enter your email...">
+        <input type="password" id="adminPass" class="login-input" placeholder="Enter your password...">
+        
+        <p id="loginError" style="display: none;">Invalid email or password.</p>
+        
+        <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
+        
+        </div>
 </div>
 
 <div id="dashboard" class="admin-wrapper">
