@@ -3,161 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NNA VITTALO — Admin Dashboard</title>
+    <title>Admin Dashboard — NNA VITTALO</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Open Sans', sans-serif; background: #f0f4f8; margin: 0; padding: 20px; color: #1a1f36; }
-        .admin-container { max-width: 900px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background: #2952c8; color: white; padding: 25px; text-align: center; }
-        .header h1 { margin: 0; font-family: 'Montserrat'; font-size: 1.5rem; }
+        :root { --primary: #2952c8; --bg: #f0f4f8; --text: #1a1f36; }
+        body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); }
         
-        .controls { padding: 20px; background: #eef2ff; display: flex; flex-direction: column; gap: 15px; border-bottom: 1px solid #d0d7de; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 20px; }
-        .stat-card { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; text-align: center; }
-        .stat-card small { color: #64748b; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
-        .stat-val { font-size: 1.25rem; font-weight: 800; color: #2952c8; margin-top: 5px; }
+        /* Login Overlay */
+        .login-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-box { background: white; padding: 40px; border-radius: 15px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn-login { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 10px; }
 
-        .booking-item { border-bottom: 1px solid #f1f5f9; }
-        .booking-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .booking-header:hover { background: #f8fafc; }
-        .booking-details { display: none; padding: 15px; background: #f8fafc; border-top: 1px dashed #e2e8f0; font-size: 0.9rem; line-height: 1.6; }
-        
-        .login-overlay { position: fixed; inset: 0; background: #2952c8; display: flex; align-items: center; justify-content: center; z-index: 100; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { background: #2952c8; color: white; border: none; padding: 12px 20px; border-radius: 5px; width: 100%; font-weight: 700; cursor: pointer; }
+        /* Dashboard Layout */
+        .admin-wrapper { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; display: none; }
+        .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-family: 'Montserrat'; font-size: 1.2rem; }
+        .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid white; color: white; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+        .logout-btn:hover { background: white; color: var(--primary); }
+
+        /* Stats & Controls */
+        .top-panel { padding: 20px; background: #f8faff; border-bottom: 1px solid #e2e8f0; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; background: white; font-size: 1rem; margin-top: 5px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .stat-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-card small { color: #64748b; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-top: 5px; }
+
+        /* Booking List */
+        .booking-row { border-bottom: 1px solid #f1f5f9; }
+        .booking-summary { padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
+        .booking-summary:hover { background: #f8fafc; }
+        .booking-details { display: none; padding: 20px; background: #fcfdfe; border-top: 1px dashed #e2e8f0; font-size: 0.9rem; line-height: 1.8; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .badge { background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <h2 style="font-family:Montserrat">Admin Login</h2>
-        <input type="email" id="adminEmail" placeholder="Admin Email">
-        <input type="password" id="adminPass" placeholder="Password">
-        <button onclick="handleLogin()">Log In</button>
+        <h2 style="font-family: Montserrat; margin-bottom: 5px;">Admin Portal</h2>
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">NNA VITTALO Management</p>
+        <input type="email" id="emailIn" placeholder="Admin Email">
+        <input type="password" id="passIn" placeholder="Password">
+        <button class="btn-login" onclick="attemptLogin()">Access Dashboard</button>
+        <p id="errorTxt" style="color: #ef4444; font-size: 0.85rem; margin-top: 15px; display: none;">Invalid credentials.</p>
     </div>
 </div>
 
-<div class="admin-container">
+<div id="dashboard" class="admin-wrapper">
     <div class="header">
-        <h1>Admin Dashboard</h1>
-        <p id="userEmail" style="font-size: 0.8rem; opacity: 0.8;"></p>
+        <h1>Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <div class="controls">
-        <label style="font-weight:700">Filter by Event ID:</label>
-        <select id="eventFilter" onchange="renderDisplay()">
+    <div class="top-panel">
+        <label style="font-weight: 700; font-size: 0.8rem; color: #475569;">FILTER BY TRIP ID</label>
+        <select id="eventFilter" onchange="applyFilter()">
             <option value="all">All Bookings</option>
         </select>
+
+        <div class="stats-grid">
+            <div class="stat-card"><small>Total Bookings</small><div id="countDiv" class="stat-val">0</div></div>
+            <div class="stat-card"><small>Revenue (PLN)</small><div id="plnDiv" class="stat-val">0</div></div>
+            <div class="stat-card"><small>Revenue (EUR)</small><div id="eurDiv" class="stat-val">€0</div></div>
+        </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card"><small>Count</small><div id="statCount" class="stat-val">0</div></div>
-        <div class="stat-card"><small>Total PLN</small><div id="statPLN" class="stat-val">0</div></div>
-        <div class="stat-card"><small>Total EUR</small><div id="statEUR" class="stat-val">€0</div></div>
-    </div>
-
-    <div id="bookingList">
+    <div id="listContainer">
         </div>
 </div>
 
 <script>
-    // 1. CONFIGURATION
-    const ADMIN_EMAILS = ["nipyup96@gmail.com", "nishinp1@gmail.com", "nishinpulpadan@gmail.com"];
-    const supabaseUrl = 'https://ghwmmkiynmnunotwnenj.supabase.co'; 
-    const supabaseKey = 'sb_publishable_Acw5np0AS4ROmGQIllYCpQ_m5NHqk6_';
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    // --- 1. SETTINGS ---
+    const ADMIN_ACCOUNTS = {
+        "nipyup96@gmail.com": "pass123",        // Change these passwords!
+        "nishinp1@gmail.com": "pass456",
+        "nishinpulpadan@gmail.com": "pass789"
+    };
 
-    let allData = [];
+    const supabaseUrl = 'YOUR_SUPABASE_URL';
+    const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+    const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // 2. AUTHENTICATION
-    async function handleLogin() {
-        const email = document.getElementById('adminEmail').value;
-        const pass = document.getElementById('adminPass').value;
+    let bookingsCache = [];
 
-        if(!ADMIN_EMAILS.includes(email)) {
-            alert("This email is not authorized as an admin.");
+    // --- 2. AUTH LOGIC ---
+    function attemptLogin() {
+        const email = document.getElementById('emailIn').value.toLowerCase().trim();
+        const pass = document.getElementById('passIn').value;
+        const err = document.getElementById('errorTxt');
+
+        if (ADMIN_ACCOUNTS[email] && ADMIN_ACCOUNTS[email] === pass) {
+            sessionStorage.setItem('admin_session', 'active');
+            startApp();
+        } else {
+            err.style.display = 'block';
+        }
+    }
+
+    function logout() {
+        sessionStorage.removeItem('admin_session');
+        window.location.reload();
+    }
+
+    // --- 3. DATA LOGIC ---
+    async function startApp() {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+
+        const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
+        
+        if (error) {
+            alert("Fetch error: " + error.message);
             return;
         }
 
-        const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-        if(error) alert(error.message);
-        else initDashboard();
-    }
+        bookingsCache = data;
 
-    async function initDashboard() {
-        document.getElementById('loginOverlay').style.display = 'none';
-        const { data: { user } } = await _supabase.auth.getUser();
-        document.getElementById('userEmail').innerText = `Logged in as: ${user.email}`;
-
-        // Fetch Data
-        const { data, error } = await _supabase.from('bookings').select('*').order('created_at', { ascending: false });
-        if(error) { console.error(error); return; }
-
-        allData = data;
-
-        // Fill Filter Dropdown
+        // Populate filter dropdown
         const filter = document.getElementById('eventFilter');
-        const uniqueEvents = [...new Set(data.map(b => b.event_id))].filter(Boolean);
-        uniqueEvents.forEach(id => {
-            const opt = document.createElement('option');
-            opt.value = id; opt.innerText = id;
-            filter.appendChild(opt);
+        const ids = [...new Set(data.map(item => item.event_id))].filter(Boolean);
+        ids.forEach(id => {
+            filter.innerHTML += `<option value="${id}">${id}</option>`;
         });
 
-        renderDisplay();
+        applyFilter();
     }
 
-    // 3. DISPLAY LOGIC
-    function renderDisplay() {
-        const selectedId = document.getElementById('eventFilter').value;
-        const filtered = (selectedId === 'all') ? allData : allData.filter(b => b.event_id === selectedId);
+    function applyFilter() {
+        const val = document.getElementById('eventFilter').value;
+        const filtered = (val === 'all') ? bookingsCache : bookingsCache.filter(b => b.event_id === val);
 
-        // Sums
-        const totalPLN = filtered.reduce((s, b) => s + (Number(b.total_price_pln) || 0), 0);
-        const totalEUR = filtered.reduce((s, b) => s + (Number(b.total_price_eur) || 0), 0);
+        // Update Stats
+        const sumPLN = filtered.reduce((acc, curr) => acc + (Number(curr.total_price_pln) || 0), 0);
+        const sumEUR = filtered.reduce((acc, curr) => acc + (Number(curr.total_price_eur) || 0), 0);
 
-        document.getElementById('statCount').innerText = filtered.length;
-        document.getElementById('statPLN').innerText = totalPLN.toLocaleString() + " PLN";
-        document.getElementById('statEUR').innerText = "€" + totalEUR.toLocaleString();
+        document.getElementById('countDiv').innerText = filtered.length;
+        document.getElementById('plnDiv').innerText = sumPLN.toLocaleString() + " PLN";
+        document.getElementById('eurDiv').innerText = "€" + sumEUR.toLocaleString();
 
-        const list = document.getElementById('bookingList');
-        list.innerHTML = filtered.map(b => `
-            <div class="booking-item">
-                <div class="booking-header" onclick="toggleDetails(this)">
+        // Render List
+        const container = document.getElementById('listContainer');
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="padding:40px; text-align:center; color:#94a3b8;">No records found.</p>`;
+            return;
+        }
+
+        container.innerHTML = filtered.map(b => `
+            <div class="booking-row">
+                <div class="booking-summary" onclick="toggleRow(this)">
                     <div>
-                        <strong>${b.event_id || 'Unknown Trip'}</strong><br>
-                        <small style="color:#64748b">${new Date(b.created_at).toLocaleDateString()}</small>
+                        <span class="badge">${b.event_id}</span>
+                        <div style="margin-top:5px; font-weight:600;">${b.customer_name}</div>
+                        <small style="color:#94a3b8;">${new Date(b.created_at).toLocaleDateString()}</small>
                     </div>
-                    <div style="text-align:right">
-                        <span style="color:#2952c8; font-weight:800">${b.total_price_pln} PLN</span>
-                        <span style="font-size:0.7rem; display:block; color:#94a3b8">▼ Details</span>
+                    <div style="text-align:right;">
+                        <div style="font-weight:800; color:#2952c8;">${b.total_price_pln} PLN</div>
+                        <small style="color:#94a3b8;">Click to expand ▼</small>
                     </div>
                 </div>
                 <div class="booking-details">
-                    <strong>👤 Customer:</strong> ${b.customer_name}<br>
-                    <strong>📞 Phone:</strong> ${b.phone_number}<br>
-                    <strong>👥 Guests:</strong> ${b.guests}<br>
-                    <strong>💶 Total EUR:</strong> €${b.total_price_eur}<br>
-                    <strong>📅 Created:</strong> ${new Date(b.created_at).toLocaleString()}
+                    <div class="detail-grid">
+                        <div><strong>👤 Name:</strong> ${b.customer_name}</div>
+                        <div><strong>📞 Phone:</strong> ${b.phone_number}</div>
+                        <div><strong>👥 Guests:</strong> ${b.guests}</div>
+                        <div><strong>💶 Price EUR:</strong> €${b.total_price_eur}</div>
+                    </div>
+                    <div style="margin-top:10px; font-size:0.75rem; color:#cbd5e0;">System ID: ${b.id}</div>
                 </div>
             </div>
         `).join('');
     }
 
-    function toggleDetails(el) {
-        const details = el.nextElementSibling;
-        details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+    function toggleRow(el) {
+        const detail = el.nextElementSibling;
+        const isHidden = detail.style.display === 'none' || detail.style.display === '';
+        detail.style.display = isHidden ? 'block' : 'none';
+        el.querySelector('small:last-child').innerText = isHidden ? 'Close details ▲' : 'Click to expand ▼';
     }
 
-    // Check if session exists on load
-    _supabase.auth.getSession().then(({data}) => {
-        if(data.session && ADMIN_EMAILS.includes(data.session.user.email)) initDashboard();
-    });
+    // Auto-login if session exists
+    if (sessionStorage.getItem('admin_session') === 'active') {
+        startApp();
+    }
 </script>
+
 </body>
 </html>
