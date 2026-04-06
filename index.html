@@ -201,11 +201,15 @@
 
     function logout() { sessionStorage.clear(); window.location.reload(); }
     
-    window.onload = () => {
+window.onload = () => {
+        // Check if user has an active session
         if (sessionStorage.getItem('admin_session') === 'active') {
+            // Stay on the current page and load the data
             loadData();
         } else {
-            window.location.href = 'admin.html'; 
+            // If not logged in, we stay on index.html 
+            // but we DO NOT redirect to admin.html (which caused the 404)
+            console.log("No active session found. Please log in.");
         }
     };
     
