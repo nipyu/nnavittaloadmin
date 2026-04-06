@@ -13,70 +13,87 @@
         :root { --primary: #0f2266; --bg: #f8fafc; --accent: #2563eb; --text: #1e293b; }
         body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
         
-        /* Dashboard Layout */
+        /* LOGIN OVERLAY STYLES */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-box { background: white; padding: 40px; border-radius: 15px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .login-box h2 { font-family: 'Montserrat'; margin-bottom: 20px; color: var(--primary); }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .login-box button { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        #loginError { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; font-weight: 600; }
+
+        /* DASHBOARD STYLES */
+        #dashboard { display: none; }
         .admin-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 15px 15px; margin-bottom: 20px; }
         
-        /* Stats Bar */
         .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
         .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }
         .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
 
-        /* Filter Section */
         .filter-section { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 1rem; cursor: pointer; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 1rem; cursor: pointer; background: white; }
 
-        /* Booking List */
-        .booking-item { background: white; margin-bottom: 12px; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; transition: 0.2s; }
-        .booking-summary { padding: 18px; display: flex; align-items: center; cursor: pointer; position: relative; }
+        .booking-item { background: white; margin-bottom: 12px; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .booking-summary { padding: 18px; display: flex; align-items: center; cursor: pointer; }
         .arrow-icon { margin-right: 15px; color: var(--accent); transition: transform 0.3s; width: 20px; text-align: center; }
         .booking-item.active .arrow-icon { transform: rotate(90deg); }
         
         .main-info { flex-grow: 1; }
         .price-info { text-align: right; font-weight: 800; color: var(--primary); }
 
-        /* Detailed Info */
-        .booking-details { display: none; padding: 20px; background: #f1f5f9; border-top: 1px solid #e2e8f0; }
-        .detail-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.95rem; }
+        .booking-details { display: none; padding: 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+        .detail-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.95rem; color: #334155; }
         .detail-row i { width: 25px; color: var(--accent); margin-right: 10px; }
-        .wa-btn { background: #25d366; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; margin-top: 10px; font-size: 0.85rem; }
-        .wa-btn i { color: white !important; margin-right: 8px; }
-
-        .logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        
+        .wa-btn { background: #25d366; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; margin-top: 10px; }
+        .wa-btn i { margin-right: 8px; font-size: 1.1rem; }
+        .logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2 style="font-family: Montserrat; margin:0; font-size: 1.2rem;">NNA VITTALO ADMIN</h2>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>NNA Admin Login</h2>
+            <input type="text" id="userInput" placeholder="Username">
+            <input type="password" id="passInput" placeholder="Password">
+            <button onclick="attemptLogin()">Login</button>
+            <p id="loginError">Invalid credentials. Try again.</p>
+        </div>
     </div>
 
-    <div class="admin-container">
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-label">Bookings</div>
-                <div id="statCount" class="stat-value">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total PLN</div>
-                <div id="statPLN" class="stat-value">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total EUR</div>
-                <div id="statEUR" class="stat-value">€0</div>
-            </div>
+    <div id="dashboard">
+        <div class="header">
+            <h2 style="font-family: Montserrat; margin:0; font-size: 1.1rem;">NNA VITTALO ADMIN</h2>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
 
-        <div class="filter-section">
-            <label style="font-size: 0.7rem; font-weight: 800; color: #64748b;">FILTER BY EVENT</label>
-            <select id="eventFilter" onchange="applyFilters()">
-                <option value="all">All Bookings</option>
-            </select>
-        </div>
+        <div class="admin-container">
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-label">Bookings</div>
+                    <div id="statCount" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total PLN</div>
+                    <div id="statPLN" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total EUR</div>
+                    <div id="statEUR" class="stat-value">€0</div>
+                </div>
+            </div>
 
-        <div id="bookingList"></div>
+            <div class="filter-section">
+                <label style="font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 5px; display: block;">FILTER BY EVENT ID</label>
+                <select id="eventFilter" onchange="applyFilters()">
+                    <option value="all">All Bookings</option>
+                </select>
+            </div>
+
+            <div id="bookingList"></div>
+        </div>
     </div>
 
 <script>
@@ -86,35 +103,50 @@
 
     let allBookings = [];
 
+    // 1. LOGIN LOGIC
+    async function attemptLogin() {
+        const u = document.getElementById('userInput').value;
+        const p = document.getElementById('passInput').value;
+        const errorMsg = document.getElementById('loginError');
+
+        // Check against your admin_users table
+        const { data, error } = await _db.from('admin_users').select('*').eq('username', u).eq('password_hash', p).single();
+
+        if (data && !error) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            loadData();
+        } else {
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    // 2. DATA LOADING
     async function loadData() {
         const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
-        if (error) { alert("Error fetching data"); return; }
+        if (error) { console.error(error); return; }
         
-        allBookings = data;
+        allBookings = data || [];
         setupFilterDropdown();
         applyFilters();
     }
 
+    // 3. FILTER LOGIC
     function setupFilterDropdown() {
         const filter = document.getElementById('eventFilter');
         const uniqueEvents = [...new Set(allBookings.map(b => b.event_id))].filter(Boolean);
         
-        // Reset to default
         filter.innerHTML = '<option value="all">All Bookings</option>';
         uniqueEvents.forEach(evt => {
             const opt = document.createElement('option');
-            opt.value = evt;
-            opt.textContent = evt;
+            opt.value = evt; opt.textContent = evt;
             filter.appendChild(opt);
         });
     }
 
     function applyFilters() {
-        const selectedEvent = document.getElementById('eventFilter').value;
-        const filtered = (selectedEvent === 'all') 
-            ? allBookings 
-            : allBookings.filter(b => b.event_id === selectedEvent);
-
+        const selected = document.getElementById('eventFilter').value;
+        const filtered = (selected === 'all') ? allBookings : allBookings.filter(b => b.event_id === selected);
         updateStats(filtered);
         renderList(filtered);
     }
@@ -122,41 +154,40 @@
     function updateStats(data) {
         const totalPLN = data.reduce((sum, b) => sum + (Number(b.total_price_pln) || 0), 0);
         const totalEUR = data.reduce((sum, b) => sum + (Number(b.total_price_eur) || 0), 0);
-        
         document.getElementById('statCount').innerText = data.length;
         document.getElementById('statPLN').innerText = totalPLN.toLocaleString() + " PLN";
         document.getElementById('statEUR').innerText = "€" + totalEUR.toLocaleString();
     }
 
+    // 4. RENDERING LIST
     function renderList(data) {
         const listContainer = document.getElementById('bookingList');
-        if (data.length === 0) {
-            listContainer.innerHTML = '<p style="text-align:center; padding:50px; color:#94a3b8;">No bookings found for this event.</p>';
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center; padding:50px;">No bookings found.</p>';
             return;
         }
 
         listContainer.innerHTML = data.map(b => {
-            const formattedDate = new Date(b.created_at).toLocaleString('en-GB', { 
-                day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
-            });
-            const cleanPhone = b.phone_number ? b.phone_number.replace(/\D/g, '') : '';
+            const phone = b.phone_number || "N/A";
+            const cleanPhone = phone.toString().replace(/\D/g, '');
 
             return `
                 <div class="booking-item">
                     <div class="booking-summary" onclick="toggleDetails(this)">
                         <i class="fas fa-chevron-right arrow-icon"></i>
                         <div class="main-info">
-                            <strong style="color:var(--accent); font-size: 0.8rem; text-transform:uppercase;">${b.event_id}</strong><br>
-                            <span style="font-weight: 700;">${b.customer_name}</span>
+                            <strong style="color:var(--accent); font-size: 0.75rem; text-transform:uppercase;">${b.event_id || 'N/A'}</strong><br>
+                            <span style="font-weight: 700;">${b.customer_name || 'Guest'}</span>
                         </div>
-                        <div class="price-info">${b.total_price_pln} PLN</div>
+                        <div class="price-info">${b.total_price_pln || 0} PLN</div>
                     </div>
                     <div class="booking-details">
-                        <div class="detail-row"><i class="fas fa-calendar"></i> <strong>Date:</strong> ${formattedDate}</div>
-                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Full Name:</strong> ${b.customer_name}</div>
-                        <div class="detail-row"><i class="fas fa-users"></i> <strong>Guests:</strong> ${b.guests}</div>
-                        <div class="detail-row"><i class="fas fa-euro-sign"></i> <strong>Amount:</strong> €${b.total_price_eur}</div>
-                        <div class="detail-row"><i class="fas fa-envelope"></i> <strong>Email:</strong> ${b.customer_email || 'Not provided'}</div>
+                        <div class="detail-row"><i class="fas fa-calendar-day"></i> <strong>Trip Date:</strong> ${b.booking_date || 'N/A'}</div>
+                        <div class="detail-row"><i class="fas fa-phone-alt"></i> <strong>Mobile number:</strong> ${phone}</div>
+                        <div class="detail-row"><i class="fas fa-mountain"></i> <strong>Full Event:</strong> ${b.event_name || 'N/A'}</div>
+                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Customer:</strong> ${b.customer_name || 'N/A'}</div>
+                        <div class="detail-row"><i class="fas fa-users"></i> <strong>Guests:</strong> ${b.guests || 0}</div>
+                        <div class="detail-row"><i class="fas fa-euro-sign"></i> <strong>Amount:</strong> €${b.total_price_eur || 0}</div>
                         
                         <a href="https://wa.me/${cleanPhone}" target="_blank" class="wa-btn">
                             <i class="fab fa-whatsapp"></i> Chat on WhatsApp
@@ -167,12 +198,12 @@
         }).join('');
     }
 
+    // 5. UI INTERACTIONS
     function toggleDetails(element) {
         const item = element.parentElement;
         const details = element.nextElementSibling;
         const isActive = item.classList.contains('active');
-        
-        // Close others (optional - remove if you want multiple open)
+
         document.querySelectorAll('.booking-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.booking-details').forEach(d => d.style.display = 'none');
 
@@ -182,19 +213,12 @@
         }
     }
 
-    function logout() { sessionStorage.clear(); window.location.reload(); }
-    
-    // Auth Check
+    function logout() { window.location.reload(); }
+
+    // Start with Login Screen visible
     window.onload = () => {
-        if (sessionStorage.getItem('admin_session') !== 'active') {
-            // If they aren't logged in, redirect them back to your login script or logic
-            // Since this is a single page file, just hide the dashboard
-            document.querySelector('.admin-container').style.display = 'none';
-            alert("Please log in first.");
-            window.location.reload();
-        } else {
-            loadData();
-        }
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
     };
 </script>
 </body>
