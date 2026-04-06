@@ -3,135 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel — NNA VITTALO</title>
+    <title>Admin Dashboard — NNA VITTALO</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --primary: #0f2266; --bg: #f0f4f8; --text: #1a1f36; --accent: #2952c8; }
-        body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); }
+        :root { --primary: #0f2266; --bg: #f8fafc; --accent: #2563eb; --text: #1e293b; }
+        body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
         
-        .login-overlay {
-            position: fixed; inset: 0;
-            background-image: linear-gradient(rgba(15, 34, 102, 0.8), rgba(41, 82, 200, 0.8)), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80');
-            background-size: cover; background-position: center;
-            display: flex; align-items: center; justify-content: center; z-index: 10001;
-        }
-        .login-box {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 24px; padding: 40px; width: 90%; max-width: 380px; text-align: center;
-        }
-        .input-group { position: relative; width: 100%; margin-bottom: 20px; }
-        .login-input { width: 100%; padding: 15px; border: none; border-radius: 12px; background: white; font-size: 1rem; box-sizing: border-box; }
-        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; }
+        /* Dashboard Layout */
+        .admin-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 15px 15px; margin-bottom: 20px; }
         
-        .btn-login { background: white; color: var(--primary); border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .btn-login:hover { background: var(--primary); color: white; }
+        /* Stats Bar */
+        .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
+        .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }
+        .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
 
-        .admin-wrapper { max-width: 900px; margin: 20px auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; display: none; }
-        .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .booking-row { border-bottom: 1px solid #eee; padding: 15px; }
-        .booking-summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .booking-details { display: none; padding: 15px; background: #f1f5f9; border-radius: 8px; margin-top: 10px; }
+        /* Filter Section */
+        .filter-section { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 1rem; cursor: pointer; }
+
+        /* Booking List */
+        .booking-item { background: white; margin-bottom: 12px; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; transition: 0.2s; }
+        .booking-summary { padding: 18px; display: flex; align-items: center; cursor: pointer; position: relative; }
+        .arrow-icon { margin-right: 15px; color: var(--accent); transition: transform 0.3s; width: 20px; text-align: center; }
+        .booking-item.active .arrow-icon { transform: rotate(90deg); }
+        
+        .main-info { flex-grow: 1; }
+        .price-info { text-align: right; font-weight: 800; color: var(--primary); }
+
+        /* Detailed Info */
+        .booking-details { display: none; padding: 20px; background: #f1f5f9; border-top: 1px solid #e2e8f0; }
+        .detail-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.95rem; }
+        .detail-row i { width: 25px; color: var(--accent); margin-right: 10px; }
+        .wa-btn { background: #25d366; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; margin-top: 10px; font-size: 0.85rem; }
+        .wa-btn i { color: white !important; margin-right: 8px; }
+
+        .logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay" class="login-overlay">
-    <div class="login-box">
-        <h1 style="font-family: Montserrat; color: white; margin-bottom: 25px; font-size: 1.5rem; font-weight: 800;">ADMIN ACCESS</h1>
-        
-        <div class="input-group">
-            <input type="text" id="userInput" class="login-input" placeholder="Username">
-        </div>
-
-        <div class="input-group">
-            <input type="password" id="passInput" class="login-input" placeholder="Password">
-            <i class="fas fa-eye toggle-password" id="eyeIcon" onclick="togglePassword()"></i>
-        </div>
-
-        <p id="loginError" style="display: none; color: #ffcccc; font-weight: 600; margin-bottom: 15px; font-size: 0.8rem;">Invalid Credentials</p>
-        <button class="btn-login" onclick="attemptLogin()">Enter Dashboard</button>
-    </div>
-</div>
-
-<div id="dashboard" class="admin-wrapper">
     <div class="header">
-        <h1 style="font-family: Montserrat; font-size: 1.1rem; margin:0;">NNA VITTALO | BOOKINGS</h1>
-        <button onclick="logout()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">Logout</button>
+        <h2 style="font-family: Montserrat; margin:0; font-size: 1.2rem;">NNA VITTALO ADMIN</h2>
+        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
-    <div id="listContainer" style="padding: 20px;"></div>
-</div>
+
+    <div class="admin-container">
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-label">Bookings</div>
+                <div id="statCount" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total PLN</div>
+                <div id="statPLN" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total EUR</div>
+                <div id="statEUR" class="stat-value">€0</div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <label style="font-size: 0.7rem; font-weight: 800; color: #64748b;">FILTER BY EVENT</label>
+            <select id="eventFilter" onchange="applyFilters()">
+                <option value="all">All Bookings</option>
+            </select>
+        </div>
+
+        <div id="bookingList"></div>
+    </div>
 
 <script>
     const supabaseUrl = 'https://ghwmmkiynmnunotwnenj.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdod21ta2l5bm1udW5vdHduZW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NzkxMjEsImV4cCI6MjA5MDU1NTEyMX0.gC5tdWEciwZbF_1FzmD16V7JX66N7nHJ-G00C4gyG_0'; 
     const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // EYE ICON LOGIC
-    function togglePassword() {
-        const passInput = document.getElementById('passInput');
-        const eyeIcon = document.getElementById('eyeIcon');
-        if (passInput.type === "password") {
-            passInput.type = "text";
-            eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-            passInput.type = "password";
-            eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
-        }
-    }
+    let allBookings = [];
 
-    async function attemptLogin() {
-        const u = document.getElementById('userInput').value.trim();
-        const p = document.getElementById('passInput').value.trim();
-        const errorMsg = document.getElementById('loginError');
-
-        try {
-            // Updated to match your 'password_hash' column name
-            const { data, error } = await _db
-                .from('admin_users')
-                .select('*')
-                .eq('username', u)
-                .eq('password_hash', p)
-                .single();
-
-            if (error || !data) {
-                console.error("Supabase error detail:", error);
-                throw new Error("Unauthorized");
-            }
-
-            sessionStorage.setItem('admin_session', 'active');
-            initDashboard();
-        } catch (err) {
-            errorMsg.style.display = 'block';
-        }
-    }
-
-    async function initDashboard() {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
+    async function loadData() {
+        // 1. Fetch data from Supabase
         const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
-        if (error) return;
         
-        const container = document.getElementById('listContainer');
-        container.innerHTML = data.map(b => `
-            <div class="booking-row">
-                <div class="booking-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
-                    <div><strong>${b.event_id}</strong><br><small>${b.customer_name}</small></div>
-                    <div style="text-align:right"><strong>${b.total_price_pln} PLN</strong></div>
+        if (error) {
+            console.error("Database Error:", error);
+            return;
+        }
+        
+        allBookings = data || [];
+        console.log("Data loaded:", allBookings); // Check your F12 console to see this
+
+        setupFilterDropdown();
+        applyFilters();
+    }
+
+    function setupFilterDropdown() {
+        const filter = document.getElementById('eventFilter');
+        // Get unique IDs from the 'event_id' column
+        const uniqueEvents = [...new Set(allBookings.map(b => b.event_id))].filter(Boolean);
+        
+        filter.innerHTML = '<option value="all">All Bookings</option>';
+        uniqueEvents.forEach(evt => {
+            const opt = document.createElement('option');
+            opt.value = evt;
+            opt.textContent = evt;
+            filter.appendChild(opt);
+        });
+    }
+
+    function applyFilters() {
+        const selectedEvent = document.getElementById('eventFilter').value;
+        const filtered = (selectedEvent === 'all') 
+            ? allBookings 
+            : allBookings.filter(b => b.event_id === selectedEvent);
+
+        updateStats(filtered);
+        renderList(filtered);
+    }
+
+    function updateStats(data) {
+        // Using total_price_pln and total_price_eur exactly as shown in your screenshot
+        const totalPLN = data.reduce((sum, b) => sum + (Number(b.total_price_pln) || 0), 0);
+        const totalEUR = data.reduce((sum, b) => sum + (Number(b.total_price_eur) || 0), 0);
+        
+        document.getElementById('statCount').innerText = data.length;
+        document.getElementById('statPLN').innerText = totalPLN.toLocaleString() + " PLN";
+        document.getElementById('statEUR').innerText = "€" + totalEUR.toLocaleString();
+    }
+
+    function renderList(data) {
+        const listContainer = document.getElementById('bookingList');
+        
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center; padding:50px; color:#94a3b8;">No bookings found.</p>';
+            return;
+        }
+
+        listContainer.innerHTML = data.map(b => {
+            // EXACT MAPPING FROM YOUR SCREENSHOT image_a71c4a.png
+            const eid = b.event_id || "N/A";
+            const cname = b.customer_name || "Guest"; 
+            const phone = b.phone_number || "";
+            const guests = b.guests || 0;
+            const pln = b.total_price_pln || 0;
+            const eur = b.total_price_eur || 0;
+            const bdate = b.booking_date || "N/A";
+            const ename = b.event_name || "N/A";
+
+            // Clean phone for WhatsApp
+            const cleanPhone = phone.toString().replace(/\D/g, '');
+
+            return `
+                <div class="booking-item">
+                    <div class="booking-summary" onclick="toggleDetails(this)">
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                        <div class="main-info">
+                            <strong style="color:var(--accent); font-size: 0.75rem; text-transform:uppercase;">${eid}</strong><br>
+                            <span style="font-weight: 700; color: #1e293b;">${cname}</span>
+                        </div>
+                        <div class="price-info">${pln} PLN</div>
+                    </div>
+                    <div class="booking-details" style="display: none;">
+                        <div class="detail-row"><i class="fas fa-calendar-day"></i> <strong>Trip Date:</strong> ${bdate}</div>
+                        <div class="detail-row"><i class="fas fa-calendar-day"></i> <strong> Mobile number : </strong> ${b.phone_number || 'N/A'}</div>
+                        <div class="detail-row"><i class="fas fa-info-circle"></i> <strong>Full Event:</strong> ${ename}</div>
+                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Customer:</strong> ${cname}</div>
+                        <div class="detail-row"><i class="fas fa-users"></i> <strong>Guests:</strong> ${guests}</div>
+                        <div class="detail-row"><i class="fas fa-euro-sign"></i> <strong>Amount:</strong> €${eur}</div>
+                        
+                        <a href="https://wa.me/${cleanPhone}" target="_blank" class="wa-btn">
+                            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+                        </a>
+                    </div>
                 </div>
-                <div class="booking-details">
-                    <p>Phone: ${b.phone_number}</p>
-                    <p>Guests: ${b.guests}</p>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
+    }
+
+    function toggleDetails(element) {
+        const item = element.parentElement;
+        const details = element.nextElementSibling;
+        const isAlreadyOpen = item.classList.contains('active');
+
+        document.querySelectorAll('.booking-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.booking-details').forEach(d => d.style.display = 'none');
+
+        if (!isAlreadyOpen) {
+            item.classList.add('active');
+            details.style.display = 'block';
+        }
     }
 
     function logout() { sessionStorage.clear(); window.location.reload(); }
-    window.onload = () => { if (sessionStorage.getItem('admin_session') === 'active') initDashboard(); };
+    
+    window.onload = () => {
+        if (sessionStorage.getItem('admin_session') === 'active') {
+            loadData();
+        } else {
+            window.location.href = 'admin.html'; 
+        }
+    };
 </script>
 </body>
 </html>
