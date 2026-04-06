@@ -208,6 +208,17 @@
             window.location.href = 'admin.html'; 
         }
     };
+    window.onload = () => {
+        // Check if user is logged in
+        if (sessionStorage.getItem('admin_session') === 'active') {
+            loadData();
+        } else {
+            // If NOT logged in, we stay on the current page to show the login overlay
+            // We remove the window.location.href redirect that was causing the 404
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+    };
 </script>
 </body>
 </html>
