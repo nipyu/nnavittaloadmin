@@ -7,177 +7,131 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script>
-        // 1. CONFIGURATION
-        const ADMIN_ACCOUNTS = {
-            "nipyup96@gmail.com": "pass1",
-            "nishinp1@gmail.com": "pass2",
-            "nishinpulpadan@gmail.com": "pass3"
-        };
-
-        const supabaseUrl = 'https://ghwmmkiynmnunotwnenj.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdod21ta2l5bm1udW5vdHduZW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NzkxMjEsImV4cCI6MjA5MDU1NTEyMX0.gC5tdWEciwZbF_1FzmD16V7JX66N7nHJ-G00C4gyG_0'; 
-        const _db = supabase.createClient(supabaseUrl, supabaseKey);
-
-        let bookingsCache = [];
-
-        // 2. LOGIN FUNCTION
-        function attemptLogin() {
-            const e = document.getElementById('emailIn').value.toLowerCase().trim();
-            const p = document.getElementById('passIn').value;
-            const errorDisplay = document.getElementById('loginError');
-
-            if (ADMIN_ACCOUNTS[e] && ADMIN_ACCOUNTS[e] === p) {
-                sessionStorage.setItem('admin_auth', 'true');
-                if(errorDisplay) errorDisplay.style.display = 'none';
-                initDashboard();
-            } else { 
-                if(errorDisplay) {
-                    errorDisplay.style.display = 'block';
-                    errorDisplay.innerText = "Invalid email or password.";
-                } else {
-                    alert("Invalid email or password.");
-                }
-            }
-        }
-
-        // 3. DASHBOARD INIT
-        async function initDashboard() {
-            const overlay = document.getElementById('loginOverlay');
-            const dash = document.getElementById('dashboard');
-            if(overlay) overlay.style.display = 'none';
-            if(dash) dash.style.display = 'block';
-
-            const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
-            if (error) { 
-                console.error(error); 
-                return; 
-            }
-
-            bookingsCache = data;
-
-            const filter = document.getElementById('eventFilter');
-            if(filter) {
-                filter.innerHTML = '<option value="all">All Bookings</option>';
-                const ids = [...new Set(data.map(b => b.event_id))].filter(Boolean);
-                ids.forEach(id => {
-                    filter.innerHTML += `<option value="${id}">${id}</option>`;
-                });
-            }
-
-            renderDisplay();
-        }
-
-        function renderDisplay() {
-            const filterEl = document.getElementById('eventFilter');
-            const val = filterEl ? filterEl.value : 'all';
-            const filtered = (val === 'all') ? bookingsCache : bookingsCache.filter(b => b.event_id === val);
-
-            const sumPLN = filtered.reduce((acc, b) => acc + (Number(b.total_price_pln) || 0), 0);
-            const sumEUR = filtered.reduce((acc, b) => acc + (Number(b.total_price_eur) || 0), 0);
-
-            document.getElementById('countDiv').innerText = filtered.length;
-            document.getElementById('plnDiv').innerText = sumPLN.toLocaleString() + " PLN";
-            document.getElementById('eurDiv').innerText = "€" + sumEUR.toLocaleString();
-
-            const container = document.getElementById('listContainer');
-            container.innerHTML = filtered.map(b => `
-                <div class="booking-row" style="border-bottom: 1px solid #eee; padding: 10px;">
-                    <div class="booking-summary" style="display:flex; justify-content:space-between; cursor:pointer;" onclick="toggleDetails(this)">
-                        <div>
-                            <strong style="color:#2952c8">${b.event_id}</strong><br>
-                            <small>${b.customer_name}</small>
-                        </div>
-                        <div style="text-align:right">
-                            <div style="font-weight:800">${b.total_price_pln} PLN</div>
-                            <small style="color:#94a3b8">Details ▼</small>
-                        </div>
-                    </div>
-                    <div class="booking-details" style="display:none; padding:10px; background:#f9f9f9; margin-top:10px;">
-                        <p><strong>👤 Name:</strong> ${b.customer_name}</p>
-                        <p><strong>📞 Phone:</strong> ${b.phone_number}</p>
-                        <p><strong>👥 Guests:</strong> ${b.guests}</p>
-                        <p><strong>💶 Amount:</strong> €${b.total_price_eur}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function toggleDetails(el) {
-            const details = el.nextElementSibling;
-            details.style.display = (details.style.display === 'block') ? 'none' : 'block';
-        }
-
-        window.onload = () => {
-            if (sessionStorage.getItem('admin_auth') === 'true') initDashboard();
-        };
-    </script>
-
     <style>
-        :root { --primary: #2952c8; --bg: #f0f4f8; --text: #1a1f36; }
-        body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .admin-wrapper { max-width: 900px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; display: none; }
-        .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .top-panel { padding: 20px; background: #f8faff; border-bottom: 1px solid #e2e8f0; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; margin-top: 10px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .stat-card { background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; text-align: center; }
-        .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
+        :root { --primary: #0f2266; --bg: #f0f4f8; --text: #1a1f36; --accent: #2952c8; }
+        body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); }
         
         .login-overlay {
             position: fixed; inset: 0;
-            background-image: linear-gradient(rgba(41, 82, 200, 0.5), rgba(41, 82, 200, 0.5)), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80');
+            background-image: linear-gradient(rgba(15, 34, 102, 0.8), rgba(41, 82, 200, 0.8)), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80');
             background-size: cover; background-position: center;
             display: flex; align-items: center; justify-content: center; z-index: 10001;
         }
-
         .login-box {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 24px; padding: 40px; width: 90%; max-width: 380px; text-align: center;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px; padding: 40px; width: 90%; max-width: 380px; text-align: center;
         }
+        .input-group { position: relative; width: 100%; margin-bottom: 20px; }
+        .login-input { width: 100%; padding: 15px; border: none; border-radius: 12px; background: white; font-size: 1rem; box-sizing: border-box; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; }
         
-        .login-input { width: 100%; padding: 15px; margin-bottom: 20px; border: none; border-radius: 12px; background: white; font-size: 1rem; }
-        .btn-login { background: rgba(255, 255, 255, 0.15); border: 2px solid white; color: white; padding: 15px; border-radius: 12px; width: 100%; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-        .btn-login:hover { background: white; color: var(--primary); }
+        .btn-login { background: white; color: var(--primary); border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background: var(--primary); color: white; }
+
+        .admin-wrapper { max-width: 900px; margin: 20px auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; display: none; }
+        .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .booking-row { border-bottom: 1px solid #eee; padding: 15px; }
+        .booking-summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .booking-details { display: none; padding: 15px; background: #f1f5f9; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <img src="https://image2url.com/r2/default/images/1775205068668-9ce153cf-7aa5-4e66-8e5e-013745d94b55.jpg" alt="Logo" style="height: 60px; margin-bottom: 20px;">
-        <h1 style="font-family: Montserrat; color: white; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; text-transform: uppercase;">Admin Dashboard</h1>
+        <h1 style="font-family: Montserrat; color: white; margin-bottom: 25px; font-size: 1.5rem; font-weight: 800;">ADMIN ACCESS</h1>
         
-        <input type="email" id="emailIn" class="login-input" placeholder="Email">
-        <input type="password" id="passIn" class="login-input" placeholder="Password">
-        
-        <p id="loginError" style="display: none; color: #ffcccc; font-weight: 600; margin-bottom: 10px;">Invalid email or password.</p>
-        
-        <button class="btn-login" onclick="attemptLogin()">SIGN IN</button>
+        <div class="input-group">
+            <input type="text" id="userInput" class="login-input" placeholder="Username">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="passInput" class="login-input" placeholder="Password">
+            <i class="fas fa-eye toggle-password" id="eyeIcon" onclick="togglePassword()"></i>
+        </div>
+
+        <p id="loginError" style="display: none; color: #ffcccc; font-weight: 600; margin-bottom: 15px; font-size: 0.8rem;">Invalid Credentials</p>
+        <button class="btn-login" onclick="attemptLogin()">Enter Dashboard</button>
     </div>
 </div>
 
 <div id="dashboard" class="admin-wrapper">
     <div class="header">
-        <h1 style="font-family: Montserrat; font-size: 1.2rem;">Dashboard</h1>
-        <button onclick="sessionStorage.clear(); window.location.reload();" style="cursor:pointer;">Logout</button>
+        <h1 style="font-family: Montserrat; font-size: 1.1rem; margin:0;">NNA VITTALO | BOOKINGS</h1>
+        <button onclick="logout()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">Logout</button>
     </div>
-
-    <div class="top-panel">
-        <label style="font-weight:700; font-size:0.8rem;">FILTER BY EVENT ID</label>
-        <select id="eventFilter" onchange="renderDisplay()">
-            <option value="all">All Bookings</option>
-        </select>
-        <div class="stats-grid">
-            <div class="stat-card"><small>Count</small><div id="countDiv" class="stat-val">0</div></div>
-            <div class="stat-card"><small>Total PLN</small><div id="plnDiv" class="stat-val">0</div></div>
-            <div class="stat-card"><small>Total EUR</small><div id="eurDiv" class="stat-val">€0</div></div>
-        </div>
-    </div>
-
-    <div id="listContainer"></div>
+    <div id="listContainer" style="padding: 20px;"></div>
 </div>
 
+<script>
+    const supabaseUrl = 'https://ghwmmkiynmnunotwnenj.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdod21ta2l5bm1udW5vdHduZW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NzkxMjEsImV4cCI6MjA5MDU1NTEyMX0.gC5tdWEciwZbF_1FzmD16V7JX66N7nHJ-G00C4gyG_0'; 
+    const _db = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // EYE ICON LOGIC
+    function togglePassword() {
+        const passInput = document.getElementById('passInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+        if (passInput.type === "password") {
+            passInput.type = "text";
+            eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            passInput.type = "password";
+            eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+
+    async function attemptLogin() {
+        const u = document.getElementById('userInput').value.trim();
+        const p = document.getElementById('passInput').value.trim();
+        const errorMsg = document.getElementById('loginError');
+
+        try {
+            // Updated to match your 'password_hash' column name
+            const { data, error } = await _db
+                .from('admin_users')
+                .select('*')
+                .eq('username', u)
+                .eq('password_hash', p)
+                .single();
+
+            if (error || !data) {
+                console.error("Supabase error detail:", error);
+                throw new Error("Unauthorized");
+            }
+
+            sessionStorage.setItem('admin_session', 'active');
+            initDashboard();
+        } catch (err) {
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    async function initDashboard() {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
+        if (error) return;
+        
+        const container = document.getElementById('listContainer');
+        container.innerHTML = data.map(b => `
+            <div class="booking-row">
+                <div class="booking-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
+                    <div><strong>${b.event_id}</strong><br><small>${b.customer_name}</small></div>
+                    <div style="text-align:right"><strong>${b.total_price_pln} PLN</strong></div>
+                </div>
+                <div class="booking-details">
+                    <p>Phone: ${b.phone_number}</p>
+                    <p>Guests: ${b.guests}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function logout() { sessionStorage.clear(); window.location.reload(); }
+    window.onload = () => { if (sessionStorage.getItem('admin_session') === 'active') initDashboard(); };
+</script>
 </body>
 </html>
