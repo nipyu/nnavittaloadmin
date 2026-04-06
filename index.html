@@ -87,26 +87,19 @@
     let allBookings = [];
 
     async function loadData() {
-        // 1. Fetch data from Supabase
         const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
+        if (error) { alert("Error fetching data"); return; }
         
-        if (error) {
-            console.error("Database Error:", error);
-            return;
-        }
-        
-        allBookings = data || [];
-        console.log("Data loaded:", allBookings); // Check your F12 console to see this
-
+        allBookings = data;
         setupFilterDropdown();
         applyFilters();
     }
 
     function setupFilterDropdown() {
         const filter = document.getElementById('eventFilter');
-        // Get unique IDs from the 'event_id' column
         const uniqueEvents = [...new Set(allBookings.map(b => b.event_id))].filter(Boolean);
         
+        // Reset to default
         filter.innerHTML = '<option value="all">All Bookings</option>';
         uniqueEvents.forEach(evt => {
             const opt = document.createElement('option');
@@ -127,7 +120,6 @@
     }
 
     function updateStats(data) {
-        // Using total_price_pln and total_price_eur exactly as shown in your screenshot
         const totalPLN = data.reduce((sum, b) => sum + (Number(b.total_price_pln) || 0), 0);
         const totalEUR = data.reduce((sum, b) => sum + (Number(b.total_price_eur) || 0), 0);
         
@@ -138,43 +130,33 @@
 
     function renderList(data) {
         const listContainer = document.getElementById('bookingList');
-        
-        if (!data || data.length === 0) {
-            listContainer.innerHTML = '<p style="text-align:center; padding:50px; color:#94a3b8;">No bookings found.</p>';
+        if (data.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center; padding:50px; color:#94a3b8;">No bookings found for this event.</p>';
             return;
         }
 
         listContainer.innerHTML = data.map(b => {
-            // EXACT MAPPING FROM YOUR SCREENSHOT image_a71c4a.png
-            const eid = b.event_id || "N/A";
-            const cname = b.customer_name || "Guest"; 
-            const phone = b.phone_number || "";
-            const guests = b.guests || 0;
-            const pln = b.total_price_pln || 0;
-            const eur = b.total_price_eur || 0;
-            const bdate = b.booking_date || "N/A";
-            const ename = b.event_name || "N/A";
-
-            // Clean phone for WhatsApp
-            const cleanPhone = phone.toString().replace(/\D/g, '');
+            const formattedDate = new Date(b.created_at).toLocaleString('en-GB', { 
+                day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+            });
+            const cleanPhone = b.phone_number ? b.phone_number.replace(/\D/g, '') : '';
 
             return `
                 <div class="booking-item">
                     <div class="booking-summary" onclick="toggleDetails(this)">
                         <i class="fas fa-chevron-right arrow-icon"></i>
                         <div class="main-info">
-                            <strong style="color:var(--accent); font-size: 0.75rem; text-transform:uppercase;">${eid}</strong><br>
-                            <span style="font-weight: 700; color: #1e293b;">${cname}</span>
+                            <strong style="color:var(--accent); font-size: 0.8rem; text-transform:uppercase;">${b.event_id}</strong><br>
+                            <span style="font-weight: 700;">${b.customer_name}</span>
                         </div>
-                        <div class="price-info">${pln} PLN</div>
+                        <div class="price-info">${b.total_price_pln} PLN</div>
                     </div>
-                    <div class="booking-details" style="display: none;">
-                        <div class="detail-row"><i class="fas fa-calendar-day"></i> <strong>Trip Date:</strong> ${bdate}</div>
-                        <div class="detail-row"><i class="fas fa-calendar-day"></i> <strong> Mobile number : </strong> ${b.phone_number || 'N/A'}</div>
-                        <div class="detail-row"><i class="fas fa-info-circle"></i> <strong>Full Event:</strong> ${ename}</div>
-                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Customer:</strong> ${cname}</div>
-                        <div class="detail-row"><i class="fas fa-users"></i> <strong>Guests:</strong> ${guests}</div>
-                        <div class="detail-row"><i class="fas fa-euro-sign"></i> <strong>Amount:</strong> €${eur}</div>
+                    <div class="booking-details">
+                        <div class="detail-row"><i class="fas fa-calendar"></i> <strong>Date:</strong> ${formattedDate}</div>
+                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Full Name:</strong> ${b.customer_name}</div>
+                        <div class="detail-row"><i class="fas fa-users"></i> <strong>Guests:</strong> ${b.guests}</div>
+                        <div class="detail-row"><i class="fas fa-euro-sign"></i> <strong>Amount:</strong> €${b.total_price_eur}</div>
+                        <div class="detail-row"><i class="fas fa-envelope"></i> <strong>Email:</strong> ${b.customer_email || 'Not provided'}</div>
                         
                         <a href="https://wa.me/${cleanPhone}" target="_blank" class="wa-btn">
                             <i class="fab fa-whatsapp"></i> Chat on WhatsApp
@@ -188,12 +170,13 @@
     function toggleDetails(element) {
         const item = element.parentElement;
         const details = element.nextElementSibling;
-        const isAlreadyOpen = item.classList.contains('active');
-
+        const isActive = item.classList.contains('active');
+        
+        // Close others (optional - remove if you want multiple open)
         document.querySelectorAll('.booking-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.booking-details').forEach(d => d.style.display = 'none');
 
-        if (!isAlreadyOpen) {
+        if (!isActive) {
             item.classList.add('active');
             details.style.display = 'block';
         }
@@ -201,18 +184,18 @@
 
     function logout() { sessionStorage.clear(); window.location.reload(); }
     
-window.onload = () => {
-        // Check if user has an active session
-        if (sessionStorage.getItem('admin_session') === 'active') {
-            // Stay on the current page and load the data
-            loadData();
+    // Auth Check
+    window.onload = () => {
+        if (sessionStorage.getItem('admin_session') !== 'active') {
+            // If they aren't logged in, redirect them back to your login script or logic
+            // Since this is a single page file, just hide the dashboard
+            document.querySelector('.admin-container').style.display = 'none';
+            alert("Please log in first.");
+            window.location.reload();
         } else {
-            // If not logged in, we stay on index.html 
-            // but we DO NOT redirect to admin.html (which caused the 404)
-            console.log("No active session found. Please log in.");
+            loadData();
         }
     };
-    
 </script>
 </body>
 </html>
