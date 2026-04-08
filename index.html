@@ -13,7 +13,7 @@
         :root { --primary: #0f2266; --bg: #f8fafc; --accent: #2563eb; --text: #1e293b; }
         body { font-family: 'Open Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
         
-        /* LOGIN OVERLAY STYLES */
+        /* LOGIN OVERLAY */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 10000; }
         .login-box { background: white; padding: 40px; border-radius: 15px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .login-box h2 { font-family: 'Montserrat'; margin-bottom: 20px; color: var(--primary); }
@@ -21,33 +21,40 @@
         .login-box button { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 10px; }
         #loginError { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; font-weight: 600; }
 
-        /* DASHBOARD STYLES */
+        /* DASHBOARD */
         #dashboard { display: none; }
-        .admin-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .admin-container { max-width: 800px; margin: 0 auto; padding: 20px; }
         .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 15px 15px; margin-bottom: 20px; }
         
-        .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
-        .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }
-        .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+        /* FILTERS & STATS */
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
+        .filter-grid input { padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; }
+        .clear-btn { background: #64748b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
 
-        .filter-section { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 1rem; cursor: pointer; background: white; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); margin-bottom: 20px; }
+        .stat-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #64748b; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
 
+        /* LIST ITEMS */
         .booking-item { background: white; margin-bottom: 12px; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
         .booking-summary { padding: 18px; display: flex; align-items: center; cursor: pointer; }
         .arrow-icon { margin-right: 15px; color: var(--accent); transition: transform 0.3s; width: 20px; text-align: center; }
         .booking-item.active .arrow-icon { transform: rotate(90deg); }
-        
         .main-info { flex-grow: 1; }
-        .price-info { text-align: right; font-weight: 800; color: var(--primary); }
+        
+        /* STATUS TAGS (Synced Design) */
+        .status-pill { font-size: 0.7rem; padding: 5px 12px; border-radius: 20px; font-weight: 800; text-transform: uppercase; background: #e2e8f0; border: 1px solid transparent; }
+        .status-paid, .status-confirmed { background: #d4f8e3 !important; color: #0d6d62 !important; border-color: #beeccf; }
 
         .booking-details { display: none; padding: 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
-        .detail-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.95rem; color: #334155; }
+        .detail-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.95rem; color: #334155; }
         .detail-row i { width: 25px; color: var(--accent); margin-right: 10px; }
         
-        .wa-btn { background: #25d366; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; margin-top: 10px; }
-        .wa-btn i { margin-right: 8px; font-size: 1.1rem; }
+        .wa-btn { background: #25d366; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; margin-top: 10px; transition: opacity 0.2s; }
+        .wa-btn:hover { opacity: 0.9; }
+        .wa-btn i { margin-right: 8px; font-size: 1.2rem; }
         .logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     </style>
 </head>
@@ -70,26 +77,21 @@
         </div>
 
         <div class="admin-container">
-            <div class="stats-bar">
-                <div class="stat-card">
-                    <div class="stat-label">Bookings</div>
-                    <div id="statCount" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total PLN</div>
-                    <div id="statPLN" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total EUR</div>
-                    <div id="statEUR" class="stat-value">€0</div>
-                </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Bookings</div>
+                <div id="statCount" class="stat-value">0</div>
             </div>
 
-            <div class="filter-section">
-                <label style="font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 5px; display: block;">FILTER BY EVENT ID</label>
-                <select id="eventFilter" onchange="applyFilters()">
-                    <option value="all">All Bookings</option>
-                </select>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label>From Date</label>
+                    <input type="date" id="dateFrom" onchange="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>To Date</label>
+                    <input type="date" id="dateTo" onchange="applyFilters()">
+                </div>
+                <button class="clear-btn" onclick="clearFilters()">Clear</button>
             </div>
 
             <div id="bookingList"></div>
@@ -103,13 +105,12 @@
 
     let allBookings = [];
 
-    // 1. LOGIN LOGIC
+    // 1. LOGIN
     async function attemptLogin() {
         const u = document.getElementById('userInput').value;
         const p = document.getElementById('passInput').value;
         const errorMsg = document.getElementById('loginError');
 
-        // Check against your admin_users table
         const { data, error } = await _db.from('admin_users').select('*').eq('username', u).eq('password_hash', p).single();
 
         if (data && !error) {
@@ -124,72 +125,68 @@
     // 2. DATA LOADING
     async function loadData() {
         const { data, error } = await _db.from('bookings').select('*').order('created_at', { ascending: false });
-        if (error) { console.error(error); return; }
+        if (error) { console.error("Database Error:", error); return; }
         
         allBookings = data || [];
-        setupFilterDropdown();
         applyFilters();
     }
 
-    // 3. FILTER LOGIC
-    function setupFilterDropdown() {
-        const filter = document.getElementById('eventFilter');
-        const uniqueEvents = [...new Set(allBookings.map(b => b.event_id))].filter(Boolean);
-        
-        filter.innerHTML = '<option value="all">All Bookings</option>';
-        uniqueEvents.forEach(evt => {
-            const opt = document.createElement('option');
-            opt.value = evt; opt.textContent = evt;
-            filter.appendChild(opt);
-        });
-    }
-
+    // 3. FILTERING
     function applyFilters() {
-        const selected = document.getElementById('eventFilter').value;
-        const filtered = (selected === 'all') ? allBookings : allBookings.filter(b => b.event_id === selected);
-        updateStats(filtered);
+        const from = document.getElementById('dateFrom').value;
+        const to = document.getElementById('dateTo').value;
+
+        let filtered = allBookings;
+
+        if (from) filtered = filtered.filter(b => b.created_at.split('T')[0] >= from);
+        if (to) filtered = filtered.filter(b => b.created_at.split('T')[0] <= to);
+
+        document.getElementById('statCount').innerText = filtered.length;
         renderList(filtered);
     }
 
-    function updateStats(data) {
-        const totalPLN = data.reduce((sum, b) => sum + (Number(b.total_price_pln) || 0), 0);
-        const totalEUR = data.reduce((sum, b) => sum + (Number(b.total_price_eur) || 0), 0);
-        document.getElementById('statCount').innerText = data.length;
-        document.getElementById('statPLN').innerText = totalPLN.toLocaleString() + " PLN";
-        document.getElementById('statEUR').innerText = "€" + totalEUR.toLocaleString();
+    function clearFilters() {
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        applyFilters();
     }
 
-    // 4. RENDERING LIST
+    // 4. RENDERING
     function renderList(data) {
         const listContainer = document.getElementById('bookingList');
         if (!data || data.length === 0) {
-            listContainer.innerHTML = '<p style="text-align:center; padding:50px;">No bookings found.</p>';
+            listContainer.innerHTML = '<p style="text-align:center; padding:50px; color:#64748b;">No bookings found.</p>';
             return;
         }
 
         listContainer.innerHTML = data.map(b => {
-            const phone = b.phone_number || "N/A";
+            const phone = b.phone || "N/A";
             const cleanPhone = phone.toString().replace(/\D/g, '');
+            
+            // Format Booking Time
+            const dateObj = new Date(b.created_at);
+            const formatted = dateObj.toLocaleDateString() + ' — ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+            
+            const status = (b.status || 'pending').toLowerCase();
+            const statusClass = (status === 'paid' || status === 'confirmed') ? 'status-confirmed' : '';
 
             return `
                 <div class="booking-item">
                     <div class="booking-summary" onclick="toggleDetails(this)">
                         <i class="fas fa-chevron-right arrow-icon"></i>
                         <div class="main-info">
-                            <strong style="color:var(--accent); font-size: 0.75rem; text-transform:uppercase;">${b.event_id || 'N/A'}</strong><br>
-                            <span style="font-weight: 700;">${b.customer_name || 'Guest'}</span>
+                            <span style="font-weight: 700; font-size: 1.1rem;">${b.full_name || 'Guest'}</span><br>
+                            <span style="color: #64748b; font-size: 0.85rem;">${formatted}</span>
                         </div>
-                        <div class="price-info">${b.total_price_pln || 0} PLN</div>
+                        <div class="status-pill ${statusClass}">${b.status || 'Pending'}</div>
                     </div>
                     <div class="booking-details">
-                        <div class="detail-row"><i class="fas fa-calendar-day"></i> <strong>Trip Date:</strong> ${b.booking_date || 'N/A'}</div>
-                        <div class="detail-row"><i class="fas fa-phone-alt"></i> <strong>Mobile number:</strong> ${phone}</div>
-                        <div class="detail-row"><i class="fas fa-mountain"></i> <strong>Full Event:</strong> ${b.event_name || 'N/A'}</div>
-                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Customer:</strong> ${b.customer_name || 'N/A'}</div>
+                        <div class="detail-row"><i class="fas fa-user"></i> <strong>Name:</strong> ${b.full_name}</div>
+                        <div class="detail-row"><i class="fas fa-phone-alt"></i> <strong>Mobile:</strong> ${phone}</div>
                         <div class="detail-row"><i class="fas fa-users"></i> <strong>Guests:</strong> ${b.guests || 0}</div>
-                        <div class="detail-row"><i class="fas fa-euro-sign"></i> <strong>Amount:</strong> €${b.total_price_eur || 0}</div>
+                        <div class="detail-row"><i class="fas fa-clock"></i> <strong>Booking Time:</strong> ${formatted}</div>
                         
-                        <a href="https://wa.me/${cleanPhone}" target="_blank" class="wa-btn">
+                        <a href="https://wa.me/${cleanPhone}" target="_blank" rel="noopener noreferrer" class="wa-btn">
                             <i class="fab fa-whatsapp"></i> Chat on WhatsApp
                         </a>
                     </div>
@@ -198,7 +195,6 @@
         }).join('');
     }
 
-    // 5. UI INTERACTIONS
     function toggleDetails(element) {
         const item = element.parentElement;
         const details = element.nextElementSibling;
@@ -214,12 +210,7 @@
     }
 
     function logout() { window.location.reload(); }
-
-    // Start with Login Screen visible
-    window.onload = () => {
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('dashboard').style.display = 'none';
-    };
+    window.onload = () => { document.getElementById('loginOverlay').style.display = 'flex'; };
 </script>
 </body>
 </html>
